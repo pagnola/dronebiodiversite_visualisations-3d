@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Viewer 2D/3D – Drone & Biodiversité</title>
+
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+<style>
+  html, body, #cesiumContainer {
+      width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden;
+  }
+  #toolbar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      font-family: sans-serif;
+  }
+  button {
+      padding: 6px 10px;
+      margin-right: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+<div id="toolbar">
+  <button id="btn2D">Vue 2D</button>
+  <button id="btn3D">Vue 3D</button>
+</div>
+
+<div id="cesiumContainer"></div>
+
+<script>
+
+// Initialisation du viewer
+const viewer = new Cesium.Viewer('cesiumContainer', {
+    timeline: false,
+    animation: false,
+    baseLayerPicker: false,
+    sceneModePicker: false
+});
+
+// --- RASTER (ORTHOPHOTO EN TUILES XYZ) ---
+const raster = viewer.imageryLayers.addImageryProvider(
+  new Cesium.UrlTemplateImageryProvider({
+      url: './raster_tiles/{z}/{x}/{y}.png',
+      maximumLevel: 22,
+      tilingScheme: new Cesium.WebMercatorTilingScheme()
+  })
+);
+
+// --- 3D TILES (MODELE WEBODM) ---
+const tileset = new Cesium.Cesium3DTileset({
+  url: './model_3d/tileset.json'
+});
+
+tileset.readyPromise.then(() => {
+    viewer.scene.primitives.add(tileset);
+    viewer.zoomTo(tileset);
+});
+
+// --- BOUTONS ---
+document.getElementById("btn2D").onclick = () => {
+    viewer.scene.morphTo2D(1.0);
+};
+
+document.getElementById("btn3D").onclick = () => {
+    viewer.scene.morphTo3D(1.0);
+};
+
+</script>
+</body>
+</html>
